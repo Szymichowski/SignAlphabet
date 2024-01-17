@@ -1,6 +1,5 @@
 from HandTracking import HandTracking
 import cv2
-from . import Handtracking
 
 class GestureRecognition:
     def __init__(self, width, height):

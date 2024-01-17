@@ -1,6 +1,6 @@
 import cv2
 import mediapipe as mp
-import PySimpleGUI as sg
+
 
 class BaseGesture:
     def __init__(self):
