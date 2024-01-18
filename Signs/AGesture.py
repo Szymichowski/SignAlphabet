@@ -1,32 +1,21 @@
 import cv2
-import mediapipe as mp
-import PySimpleGUI as sg
-
-class BaseGesture:
-    def __init__(self):
-        pass
-
-    def detect_gesture(self, frame):
-        raise NotImplementedError("Subclasses must implement detect_gesture method.")
+from BaseGesture import BaseGesture
 
 class AGestureDetector(BaseGesture):
     def __init__(self):
         super().__init__()
-        self.mp_hands = mp.solutions.hands
-        self.hands = self.mp_hands.Hands()
-        self.mp_drawing = mp.solutions.drawing_utils
 
     def detect_gesture(self, frame):
-        result = self.hands.process(frame)
+        self.scan_hands(frame)
 
-        if result.multi_hand_landmarks:
-            for hand_landmarks in result.multi_hand_landmarks:
+        if self.results.multi_hand_landmarks:
+            for hand_landmarks in self.results.multi_hand_landmarks:
                 self.mp_drawing.draw_landmarks(frame, hand_landmarks, self.mp_hands.HAND_CONNECTIONS)
 
                 if self.is_a_gesture(hand_landmarks):
-                    return True
+                    return "a"
 
-        return False
+        return None  # Geste wurde nicht erkannt, daher wird None zurückgegeben
 
     def is_a_gesture(self, landmarks):
         thumb_tip = landmarks.landmark[self.mp_hands.HandLandmark.THUMB_TIP]
@@ -38,41 +27,3 @@ class AGestureDetector(BaseGesture):
             return True
         else:
             return False
-
-def main():
-    cap = cv2.VideoCapture(0)
-    a_gesture_detector = AGestureDetector()
-
-    # PySimpleGUI GUI erstellen
-    layout = [
-        [sg.Image(filename='', key='-IMAGE-')],
-        [sg.Button('Exit')]
-    ]
-    window = sg.Window('A Gesture Detection', layout, finalize=True, resizable=True)
-
-    while cap.isOpened():
-        ret, frame = cap.read()
-
-        if not ret:
-            continue
-
-        frame = cv2.flip(frame, 1)
-
-        if a_gesture_detector.detect_gesture(frame):
-            print("OK")
-
-        # Aktualisiere das GUI-Bild
-        imgbytes = cv2.imencode('.png', frame)[1].tobytes()
-        window['-IMAGE-'].update(data=imgbytes)
-
-        event, values = window.read(timeout=20)
-
-        if event == sg.WIN_CLOSED or event == 'Exit':
-            break
-
-    cap.release()
-    cv2.destroyAllWindows()
-    window.close()
-
-if __name__ == "__main__":
-    main()
