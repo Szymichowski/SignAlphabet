@@ -9,7 +9,7 @@ class BaseGesture:
     def detect_gesture(self, frame):
         raise NotImplementedError("Subclasses must implement detect_gesture method.")
 
-class CGestureDetector(BaseGesture):
+class DGestureDetector(BaseGesture):
     def __init__(self):
         super().__init__()
         self.mp_hands = mp.solutions.hands
@@ -36,21 +36,21 @@ class CGestureDetector(BaseGesture):
         pinkie_finger_tip =landmarks.landmark[self.mp_hands.HandLandmark.PINKIE_FINGER_TIP]
 
         # Anpassung: Überprüfe auch, ob der Daumen in der Handfläche ist
-        if thumb_tip.y < index_finger_tip.y and thumb_tip.y < middle_finger_tip.y and thumb_tip.y < ring_finger_tip.y and thumb_tip.y < pinkie_finger_tip.y and thumb_tip.x > pinkie_finger_tip.x:
+        if thumb_tip.y < index_finger_tip.y and pinkie_finger_tip.y < index_finger_tip.y and thumb_tip.x > index_finger_tip.x:
             return True
         else:
             return False
 
 def main():
     cap = cv2.VideoCapture(0)
-    a_gesture_detector = CGestureDetector()
+    a_gesture_detector = DGestureDetector()
 
     # PySimpleGUI GUI erstellen
     layout = [
         [sg.Image(filename='', key='-IMAGE-')],
         [sg.Button('Exit')]
     ]
-    window = sg.Window('C Gesture Detection', layout, finalize=True, resizable=True)
+    window = sg.Window('D Gesture Detection', layout, finalize=True, resizable=True)
 
     while cap.isOpened():
         ret, frame = cap.read()
